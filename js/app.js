@@ -5,23 +5,46 @@ var model = {
 				name: 'The Bourne Valley Inn',
 				location: 'St Mary Bourne',
 				lat: '51.2482932',
-				lng: '-1.3917507999999543'
+				lng: '-1.3917507999999543',
+				marker: undefined,
+				infowindow: undefined
 			},
 			{
 				name: 'Wyke Down',
 				location: 'Picket Piece',
 				lat: '51.2267321',
-				lng: '-1.4240992999999662'
+				lng: '-1.4240992999999662',
+				marker: undefined,
+				infowindow: undefined
 			},
 			{
 				name: 'Another pub',
 				location: 'Andover',
 				lat: '51.2544545',
-				lng: '-1.4123236726'
+				lng: '-1.4123236726',
+				marker: undefined,
+				infowindow: undefined
+			},
+			{
+				name: 'Yet Another pub',
+				location: 'Andover',
+				lat: '51.27343487',
+				lng: '-1.4434734',
+				marker: undefined,
+				infowindow: undefined
 			}
-		]
-}
+	],
 
+	Pub: function(data) {  // data is a passed in object literal from model or ajax request
+		this.name = ko.observable(data.name);
+		this.location = ko.observable(data.location);
+		this.lat = ko.observable(data.lat);
+		this.lng = ko.observable(data.lng);
+		this.marker = ko.observable(data.marker);
+		this.infowindow = ko.observable(data.infowindow);
+	}
+
+}
 
 var MapView = {
 
@@ -40,27 +63,29 @@ var MapView = {
 				position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
 				map: map
 			});
-			MapView.markerClickAction(marker, model.pubs[i].name, model.pubs[i].location);
+			model.pubs[i].marker = marker; // save marker object back to model
+			MapView.markerClickAction(marker, model.pubs[i].name, model.pubs[i].location, i);
 		}
 	},
 
-	markerClickAction: function(marker, pubName, location) {
+	// create infowindow and add listener for marker click actions
+	markerClickAction: function(marker, pubName, location, i) {
 		var infowindow = new google.maps.InfoWindow({
 			content: pubName + ' - ' + location
 		});
 
+		model.pubs[i].infowindow = infowindow; // save infowindow object back to model
+
 		marker.addListener('click', function() {
-			if (marker.getAnimation() !== null) {
-				marker.setAnimation(null);
-			} else {
-			//	infowindow.open(marker.get('map'), marker);
-			//	marker.setAnimation(google.maps.Animation.BOUNCE);
-			//	setTimeout(function(){ marker.setAnimation(null); }, 1400);
+	//		if (marker.getAnimation() !== null) {
+	//			marker.setAnimation(null);
+	//		} else {
 			MapView.clickAction(marker, infowindow);
-			}
+	//		}
 		});
 	},
 
+	// open infowindow and bounce marker on click event
 	clickAction: function(marker, infowindow) {
 		infowindow.open(marker.get('map'), marker);
 		marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -70,13 +95,6 @@ var MapView = {
 }
 
 
-var Pub = function(data) {  // data is a passed in object literal from model or ajax request
-	this.name = ko.observable(data.name);
-	this.locattion = ko.observable(data.location);
-	this.lat = ko.observable(data.lat);
-	this.lng = ko.observable(data.lng);
-}
-
 var ViewModel = function() {
 
 	var self = this;  // self will always equal VM
@@ -84,8 +102,14 @@ var ViewModel = function() {
 	this.pubList = ko.observableArray([]);
 
 	model.pubs.forEach(function(pub) {
-		self.pubList.push( new Pub(pub) );
+		self.pubList.push( new model.Pub(pub) );
 	});
+
+	this.listClick = function(object) {
+//		MapView.clickAction(object.marker(), object.infowindow());
+		console.log(object.marker());
+		console.log(object.infowindow());
+	}
 
 
 }
