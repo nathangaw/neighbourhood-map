@@ -22,24 +22,29 @@ var model = {
 		]
 }
 
-// call map and create markers
-function initMap() {
-	var myLatLng = {lat: -25.363, lng: 131.044};
 
-	var map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 12,
-		center: {lat: 51.221863, lng: -1.439873}
-	});
+var MapView = {
 
-	for (var i = 0; i < model.pubs.length; i++) {
-		var marker = new google.maps.Marker({
-			position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
-			map: map
+	// call map and create markers
+	initMap: function() {
+
+		var myLatLng = {lat: -25.363, lng: 131.044};
+
+		var map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 12,
+			center: {lat: 51.221863, lng: -1.439873}
 		});
-		markerClickAction(marker, model.pubs[i].name, model.pubs[i].location);
-	}
 
-    function markerClickAction(marker, pubName, location) {
+		for (var i = 0; i < model.pubs.length; i++) {
+			var marker = new google.maps.Marker({
+				position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
+				map: map
+			});
+			MapView.markerClickAction(marker, model.pubs[i].name, model.pubs[i].location);
+		}
+	},
+
+	markerClickAction: function(marker, pubName, location) {
 		var infowindow = new google.maps.InfoWindow({
 			content: pubName + ' - ' + location
 		});
@@ -51,10 +56,17 @@ function initMap() {
 			//	infowindow.open(marker.get('map'), marker);
 			//	marker.setAnimation(google.maps.Animation.BOUNCE);
 			//	setTimeout(function(){ marker.setAnimation(null); }, 1400);
-			clickAction(marker, infowindow);
+			MapView.clickAction(marker, infowindow);
 			}
 		});
+	},
+
+	clickAction: function(marker, infowindow) {
+		infowindow.open(marker.get('map'), marker);
+		marker.setAnimation(google.maps.Animation.BOUNCE);
+		setTimeout(function(){ marker.setAnimation(null); }, 1400);
 	}
+
 }
 
 
@@ -64,12 +76,6 @@ var Pub = function(data) {  // data is a passed in object literal from model or 
 	this.lat = ko.observable(data.lat);
 	this.lng = ko.observable(data.lng);
 }
-
-var clickAction = function(marker, infowindow) {
-		infowindow.open(marker.get('map'), marker);
-		marker.setAnimation(google.maps.Animation.BOUNCE);
-		setTimeout(function(){ marker.setAnimation(null); }, 1400);
-	};
 
 var ViewModel = function() {
 
