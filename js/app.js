@@ -65,37 +65,15 @@ var MapView = {
 			center: {lat: 51.221863, lng: -1.439873}
 		});
 
-		for (var i = 0; i < ViewModel.pubList().length; i++) {
-			 var marker = new google.maps.Marker({
-				position: new google.maps.LatLng(ViewModel.pubList()[i].lat(), ViewModel.pubList()[i].lng()),
-				map: map
-			});
-			ViewModel.pubList()[i].marker(marker); // save marker object to pubList
-			MapView.markerClickAction(marker, ViewModel.pubList()[i].name(), ViewModel.pubList()[i].location(), i);
-		}
-	},
-
-
-/*
-	initMap: function() {
-
-		var myLatLng = {lat: -25.363, lng: 131.044};
-
-		var map = new google.maps.Map(document.getElementById('map'), {
-			zoom: 12,
-			center: {lat: 51.221863, lng: -1.439873}
-		});
-
 		for (var i = 0; i < model.pubs.length; i++) {
 			 var marker = new google.maps.Marker({
 				position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
 				map: map
 			});
-			model.pubs[i].marker = marker; // save marker object back to model
-			console.log(model.pubs[i].marker);
+			saveMarkers();
 			MapView.markerClickAction(marker, model.pubs[i].name, model.pubs[i].location, i);
 		}
-	},*/
+	},
 
 	// create infowindow and add listener for marker click actions
 	markerClickAction: function(marker, pubName, location, i) {
@@ -164,6 +142,7 @@ var ViewModel = function() {
 	}
 
 }
+
 
 ko.applyBindings( new ViewModel() );
 
