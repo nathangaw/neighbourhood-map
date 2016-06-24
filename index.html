@@ -16,11 +16,12 @@
 
   <div class="list" style="width: 30%">
     <div class="filter">
-      <input></input><button>Filter</button>
+      <input data-bind="textInput: filterPhrase"></input><button data-bind="click: checkFilter">Filter now</button>
+      <h4>You searched for: <span data-bind="text: filterPhrase"></span></h4>
     </div>
     <div class="listitems">
       <ul data-bind="foreach: pubList">
-        <li data-bind="text: name, click: $parent.listClick"></li>
+        <li data-bind="text: name, click: $parent.listClick, visible: visible"></li>
       </ul>
     </div>
 

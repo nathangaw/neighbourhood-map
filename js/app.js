@@ -7,7 +7,8 @@ var model = {
 				lat: '51.2482932',
 				lng: '-1.3917507999999543',
 				marker: undefined,
-				infowindow: undefined
+				infowindow: undefined,
+				visible: true
 			},
 			{
 				name: 'Wyke Down',
@@ -15,7 +16,8 @@ var model = {
 				lat: '51.2267321',
 				lng: '-1.4240992999999662',
 				marker: undefined,
-				infowindow: undefined
+				infowindow: undefined,
+				visible: true
 			},
 			{
 				name: 'Another pub',
@@ -23,7 +25,8 @@ var model = {
 				lat: '51.2544545',
 				lng: '-1.4123236726',
 				marker: undefined,
-				infowindow: undefined
+				infowindow: undefined,
+				visible: true
 			},
 			{
 				name: 'Yet Another pub',
@@ -31,7 +34,8 @@ var model = {
 				lat: '51.27343487',
 				lng: '-1.4434734',
 				marker: undefined,
-				infowindow: undefined
+				infowindow: undefined,
+				visible: true
 			}
 	],
 
@@ -42,9 +46,11 @@ var model = {
 		this.lng = ko.observable(data.lng);
 		this.marker = ko.observable(data.marker);
 		this.infowindow = ko.observable(data.infowindow);
+		this.visible = ko.observable(data.visible);
 	}
 
 }
+
 
 var MapView = {
 
@@ -59,11 +65,11 @@ var MapView = {
 		});
 
 		for (var i = 0; i < model.pubs.length; i++) {
-			var marker = new google.maps.Marker({
+			 var marker = new google.maps.Marker({
 				position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
 				map: map
 			});
-			model.pubs[i].marker = marker; // save marker object back to model
+
 			MapView.markerClickAction(marker, model.pubs[i].name, model.pubs[i].location, i);
 		}
 	},
@@ -77,11 +83,7 @@ var MapView = {
 		model.pubs[i].infowindow = infowindow; // save infowindow object back to model
 
 		marker.addListener('click', function() {
-	//		if (marker.getAnimation() !== null) {
-	//			marker.setAnimation(null);
-	//		} else {
 			MapView.clickAction(marker, infowindow);
-	//		}
 		});
 	},
 
@@ -106,11 +108,43 @@ var ViewModel = function() {
 	});
 
 	this.listClick = function(object) {
-//		MapView.clickAction(object.marker(), object.infowindow());
+	//	MapView.clickAction(object.marker(), object.infowindow());
 		console.log(object.marker());
 		console.log(object.infowindow());
 	}
 
+	this.filterPhrase = ko.observable('');
+
+	// checks filter phrase against pubnames and hides names that aren't matched
+	this.checkFilter = function() {
+
+		// convert filter phrase to lower case and assign to simpler var
+		var search = self.filterPhrase().toLowerCase();
+
+		// iterate over pub names and check whether match filter phrase
+		for (i = 0; i < self.pubList().length; i++) {
+
+			var pubName = self.pubList()[i].name().toLowerCase();
+		//	var pubForVisibility = self.pubList()[i];
+
+
+			if (pubName.startsWith(search)) {
+			self.pubList()[i].visible(true); // if filter matches name, change visible value to true
+			//TODO: set marker visibility to visible
+			} else {
+			self.pubList()[i].visible(false); // if filter doesn't match name, change visible value to false
+			//TODO: set marker visibility to hidden
+			}
+
+		}
+
+	}
+
+	this.hide = function(pubName) {
+		console.log('hide function is running');
+		console.log(pubName.visible);
+		pubName.visible = false;
+	}
 
 }
 
