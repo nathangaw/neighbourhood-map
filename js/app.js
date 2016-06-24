@@ -52,66 +52,67 @@ var model = {
 
 }
 
+var map;
 
 var MapView = {
 
 	// call map and create markers
 	initMap: function() {
 
-		var myLatLng = {lat: -25.363, lng: 131.044};
+	//	var myLatLng = {lat: -25.363, lng: 131.044};
 
-		var map = new google.maps.Map(document.getElementById('map'), {
+		map = new google.maps.Map(document.getElementById('map'), {
 			zoom: 12,
 			center: {lat: 51.221863, lng: -1.439873}
 		});
 
-		for (var i = 0; i < model.pubs.length; i++) {
-			 var marker = new google.maps.Marker({
-				position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
-				map: map
-			});
-			saveMarkers();
-			MapView.markerClickAction(marker, model.pubs[i].name, model.pubs[i].location, i);
-		}
-	},
+		ko.applyBindings( new ViewModel() );
 
-	// create infowindow and add listener for marker click actions
-	markerClickAction: function(marker, pubName, location, i) {
-		var infowindow = new google.maps.InfoWindow({
-			content: pubName + ' - ' + location
-		});
 
-	//	model.pubs[i].infowindow = infowindow; // save infowindow object back to model
-
-		marker.addListener('click', function() {
-			MapView.clickAction(marker, infowindow);
-		});
-	},
-
-	// open infowindow and bounce marker on click event
-	clickAction: function(marker, infowindow) {
-		infowindow.open(marker.get('map'), marker);
-		marker.setAnimation(google.maps.Animation.BOUNCE);
-		setTimeout(function(){ marker.setAnimation(null); }, 1400);
 	}
-
 }
-
 
 var ViewModel = function() {
 
 	var self = this;  // self will always equal VM
 
-	this.pubList = ko.observableArray([]);
+	self.pubList = ko.observableArray([]);
 
 	model.pubs.forEach(function(pub) {
 		self.pubList.push( new model.Pub(pub) );
 	});
 
-	this.listClick = function(object) {
-	//	MapView.clickAction(object.marker(), object.infowindow());
-		console.log(object.marker());
-		console.log(object.infowindow());
+	//create markers
+	self.pubList().forEach(function(pub) {
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(pub.lat(), pub.lng()),
+			map: map
+		});
+
+		pub.marker = marker; // assign markers to pub object in pubList
+
+		var infowindow = new google.maps.InfoWindow({
+			content: pub.name() + ' - ' + pub.location()
+		});
+
+		pub.infowindow = infowindow;
+
+		marker.addListener('click', function() {
+			self.clickAction(marker, infowindow);
+		});
+
+	})
+
+	self.clickAction = function(marker, infowindow) {
+		infowindow.open(marker.get('map'), marker);
+		marker.setAnimation(google.maps.Animation.BOUNCE);
+		setTimeout(function(){ marker.setAnimation(null); }, 1400);
+	}
+
+
+
+	self.listClick = function(object) {
+		self.clickAction(object.marker, object.infowindow);
 	}
 
 	this.filterPhrase = ko.observable('');
@@ -126,14 +127,18 @@ var ViewModel = function() {
 		for (i = 0; i < self.pubList().length; i++) {
 
 			var pubName = self.pubList()[i].name().toLowerCase();
-		//	var pubForVisibility = self.pubList()[i];
 
 
 			if (pubName.startsWith(search)) {
 			self.pubList()[i].visible(true); // if filter matches name, change visible value to true
+			var markerToShow = self.pubList()[i].marker;
+			markerToShow.setVisible(true);
 			//TODO: set marker visibility to visible
 			} else {
 			self.pubList()[i].visible(false); // if filter doesn't match name, change visible value to false
+			var markerToHide = self.pubList()[i].marker;
+			markerToHide.setVisible(false);
+
 			//TODO: set marker visibility to hidden
 			}
 
@@ -144,6 +149,5 @@ var ViewModel = function() {
 }
 
 
-ko.applyBindings( new ViewModel() );
 
 
