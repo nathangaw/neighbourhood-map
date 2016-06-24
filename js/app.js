@@ -67,7 +67,7 @@ var MapView = {
 
 		for (var i = 0; i < ViewModel.pubList().length; i++) {
 			 var marker = new google.maps.Marker({
-				position: new google.maps.LatLng(model.pubs[i].lat, model.pubs[i].lng),
+				position: new google.maps.LatLng(ViewModel.pubList()[i].lat(), ViewModel.pubList()[i].lng()),
 				map: map
 			});
 			ViewModel.pubList()[i].marker(marker); // save marker object to pubList
