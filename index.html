@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Local Pubs</title>
+    <title>Andover Pubs</title>
     <meta name="viewport" content="width=device-width">
 
 
@@ -12,13 +12,13 @@
   <body>
 
   <div>
-    <h1>Local Pubs</h1>
+    <h1>Andover Pubs</h1>
   </div>
 
   <div class="list" style="width: 30%">
     <div class="filter">
       <input data-bind="textInput: filterPhrase"></input><button data-bind="click: checkFilter">Filter now</button>
-      <h4>You searched for: <span data-bind="text: filterPhrase"></span></h4>
+      <button data-bind="visible: showResetButton, click: clearFilter">Remove filter</button>
     </div>
     <div class="listitems">
       <ul data-bind="foreach: pubList">
@@ -31,9 +31,12 @@
   <div id="map" style="width: 80%; height: 700px">
 
   </div>
-  <script src="js/lib/knockout-3.2.0.js"></script>
+  <div>
+    <p>Data courtesy of Google Maps and Foursquare.</p>
+  <script src="js/lib/knockout-3.2.0.js" async></script>
   <script src="js/app.js" async></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvytZSkav8-kdIVLQsSOs_jnfo-HFNvTw&callback=MapView.initMap" async></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvytZSkav8-kdIVLQsSOs_jnfo-HFNvTw&callback=MapView.initMap"onerror="MapView.googleError()" async></script>
+  <script src="js/lib/jquery.min.js" async></script>
 
 
 
