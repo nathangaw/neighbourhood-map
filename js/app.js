@@ -1,4 +1,3 @@
-
 var model = {
 
 	// raw data
@@ -45,7 +44,8 @@ var model = {
 			}
 	],
 
-	// constructor function to create each pub with observable data
+	// constructor function to create each pub with observable data. Some data could be left as non-observable
+	// but converting all for consistency and future-proofing
 	Pub: function(data) {
 		this.name = ko.observable(data.name);
 		this.location = ko.observable(data.location);
@@ -55,15 +55,13 @@ var model = {
 		this.venueID = ko.observable(data.venueID);
 	}
 
-}
+};
 
 var map;
 
 var MapView = {
 
-
-
-
+	// initialise map
 	initMap: function() {
 
 		map = new google.maps.Map(document.getElementById('map'), {
@@ -83,97 +81,116 @@ var MapView = {
 		  map.setCenter(center);
 		});
 
+		// implement Knockout bindings
 		ko.applyBindings( new ViewModel() );
 
 	},
 
+	// error message if Google Maps API returns error
 	googleError: function() {
 		window.alert('Apologies, but Google Maps is not responding. Please try again later.');
 	}
-}
+};
 
 var ViewModel = function() {
 
-	var self = this;  // self will always equal VM
+	// self will always reference ViewModel
+	var self = this;
 
+	// create observable array for pubs to populate
 	self.pubList = ko.observableArray([]);
 
+	// run constructor function and push objects to observable array
 	model.pubs.forEach(function(pub) {
 		self.pubList.push( new model.Pub(pub) );
 	});
 
+	// set reset button to be hidden by default
 	this.showResetButton = ko.observable(false);
 
+	// create infowindow object for use later
 	var infowindow = new google.maps.InfoWindow();
 
+	// loop over pubList array. Initial action to create map marker
 	self.pubList().forEach(function(pub) {
 		var marker = new google.maps.Marker({
 			position: new google.maps.LatLng(pub.lat(), pub.lng()),
 			map: map
 		});
 
-		pub.marker = marker; // assign markers to pub object in pubList
+		// assign marker to pub object in pubList
+		pub.marker = marker;
 
+		// construct foursquare url
 		var foursquareURL = 'https://api.foursquare.com/v2/venues/' + pub.venueID() + '?client_id=DMLUVT5P3HRQXMDHJ0H5ZU3IEBFPSWQRLZTJKGW2PC5XNSZK&client_secret=O5ZUDTNLXKD25KTF4MDJWNLTXZSGP1GAL5T2OBPAVHUN1LYK&v=20160625';
 
+		// retrieve data from foursquare
 		$.ajax({
 			url: foursquareURL,
 			format: 'json',
+
+			// if API call is successful extract data from response
 			success: function (data) {
 				var phone = data.response.venue.contact.formattedPhone;
 				var likeCount = data.response.venue.likes.count;
 				var foursquareCanonicalURL = data.response.venue.canonicalUrl;
 
-				var contentString =	pub.name() + ' - ' + pub.location() + '<br>' + 'Tel: ' + phone + '<br>' + 'Foursquare Likes: ' + likeCount + '<br>' + '<a href="' + foursquareCanonicalURL + '">View on Foursquare</a>'
+				var contentString =	pub.name() + ' - ' + pub.location() + '<br>' + 'Tel: ' + phone + '<br>' + 'Foursquare Likes: ' + likeCount + '<br>' + '<a href="' + foursquareCanonicalURL + '">View on Foursquare</a>';
 				pub.contentString = contentString;
 				pub.infowindow = infowindow;
+
+				// call function to add event listener
 				self.listener(marker, infowindow, contentString);
 			},
+
+			// if API call fails modify data used in infowindow
 			error: function() {
 
-				var contentString =	pub.name() + ' - ' + pub.location() + '<br>Additional information from Foursquare is not available at this time.'
+				var contentString =	pub.name() + ' - ' + pub.location() + '<br>Additional information from Foursquare is not available at this time.';
 				pub.contentString = contentString;
 				pub.infowindow = infowindow;
+
+				// call function to add event listener
 				self.listener(marker, infowindow, contentString);
 			}
-		})
-	})
+		});
+	});
 
+	// adds event listener to map marker
 	self.listener = function(marker, infowindow, contentString) {
 		marker.addListener('click', function() {
 		self.clickAction(marker, infowindow, contentString);
 		});
-	}
+	};
 
-
+	// actions to be taken upon click
 	self.clickAction = function(marker, infowindow, contentString) {
 		infowindow.setContent(contentString);
 		infowindow.open(marker.get('map'), marker);
 		marker.setAnimation(google.maps.Animation.BOUNCE);
 		setTimeout(function(){ marker.setAnimation(null); }, 1400);
-	}
+	};
 
 
-
+	// triggered by list click, calls clickAction function
 	self.listClick = function(object) {
 		self.clickAction(object.marker, object.infowindow, object.contentString);
-	}
+	};
 
+	// sets filter input text as observable
 	this.filterPhrase = ko.observable('');
 
 	// checks filter phrase against pubnames and hides names that aren't matched
 	this.checkFilter = function() {
 
-		// close all infowindows so open windows don't remain when markers removed
+		// close all infowindows so open windows don't remain when markers are removed
 		infowindow.close();
 
 		// convert filter phrase to lower case and assign to simpler var
 		var search = self.filterPhrase().toLowerCase();
 
-
-
-		// iterate over pub names and check whether match filter phrase
-		for (i = 0; i < self.pubList().length; i++) {
+		// iterate over pub names and check whether they match filter phrase
+		for (var i = 0; i < self.pubList().length; i++) {
 
 			var pubName = self.pubList()[i].name().toLowerCase();
 
@@ -181,22 +198,20 @@ var ViewModel = function() {
 			if (pubName.startsWith(search)) {
 			self.pubList()[i].visible(true); // if filter matches name, change visible value to true
 			var markerToShow = self.pubList()[i].marker;
-			markerToShow.setVisible(true);
+			markerToShow.setVisible(true); // if filter matches name, change marker visibility to true
 			} else {
 			self.pubList()[i].visible(false); // if filter doesn't match name, change visible value to false
 			var markerToHide = self.pubList()[i].marker;
-			markerToHide.setVisible(false);
-			this.showResetButton(true);
-
-
+			markerToHide.setVisible(false); // if filter doesn't match name, change marker visibility to false
+			this.showResetButton(true); // if at least one list object has been hidden, show 'reset filter' button
 			}
-
 		}
+	};
 
-	}
-
+	// resets filter
 	this.clearFilter = function() {
-		for (i = 0; i < self.pubList().length; i++) {
+		for (var i = 0; i < self.pubList().length; i++) {
+
 			// makes all pubs in list visible
 			self.pubList()[i].visible(true);
 
@@ -206,7 +221,5 @@ var ViewModel = function() {
 			// hides reset filter button
 			this.showResetButton(false);
 		}
-	}
-
-
-}
+	};
+};
