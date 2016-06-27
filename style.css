@@ -23,11 +23,6 @@ ul:first-child {
 	padding-top: 15px;
 }
 
-#filter-button {
-	margin-top: 10px;
-	margin-bottom: 10px;
-}
-
 .listhide {
 	display: none;
 }

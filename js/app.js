@@ -1,3 +1,5 @@
+var map;
+
 var model = {
 
 	// raw data
@@ -57,8 +59,6 @@ var model = {
 
 };
 
-var map;
-
 var MapView = {
 
 	// initialise map
@@ -71,14 +71,15 @@ var MapView = {
 
 		// keep centre of map in middle of window on resize. Courtesy of http://stackoverflow.com/questions/8792676/center-google-maps-v3-on-browser-resize-responsive
 		var center;
+
 		function calculateCenter() {
-		  center = map.getCenter();
+			center = map.getCenter();
 		}
 		google.maps.event.addDomListener(map, 'idle', function() {
-		  calculateCenter();
+			calculateCenter();
 		});
 		google.maps.event.addDomListener(window, 'resize', function() {
-		  map.setCenter(center);
+			map.setCenter(center);
 		});
 
 		// implement Knockout bindings
@@ -109,18 +110,17 @@ var ViewModel = function() {
 		} else {
 			self.listHide(false);
 			self.menuButtonVisible(false);
-		};
+		}
 	});
 
 	// control showing/hiding of menu on menu button click
 	self.showMenu = function() {
-		if (self.listHide() == true) {
+		if (self.listHide() === true) {
 			self.listHide(false);
 		} else {
 			self.listHide(true);
 		}
-
-	}
+	};
 
 	// create observable array for pubs to populate
 	self.pubList = ko.observableArray([]);
@@ -160,7 +160,7 @@ var ViewModel = function() {
 				var likeCount = data.response.venue.likes.count;
 				var foursquareCanonicalURL = data.response.venue.canonicalUrl;
 
-				var contentString =	pub.name() + ' - ' + pub.location() + '<br>' + 'Tel: ' + phone + '<br>' + 'Foursquare Likes: ' + likeCount + '<br>' + '<a href="' + foursquareCanonicalURL + '">View on Foursquare</a>';
+				var contentString =	pub.name() + ' - ' + pub.location() + '<br>' + 'Tel: ' + phone + '<br>' + 'Foursquare Likes: ' + likeCount + '<br>' + '<a href="' + foursquareCanonicalURL + '" target="_blank">View on Foursquare</a>';
 				pub.contentString = contentString;
 				pub.infowindow = infowindow;
 
@@ -184,7 +184,7 @@ var ViewModel = function() {
 	// adds event listener to map marker
 	self.listener = function(marker, infowindow, contentString) {
 		marker.addListener('click', function() {
-		self.clickAction(marker, infowindow, contentString);
+			self.clickAction(marker, infowindow, contentString);
 		});
 	};
 
@@ -194,13 +194,14 @@ var ViewModel = function() {
 		infowindow.open(marker.get('map'), marker);
 		marker.setAnimation(google.maps.Animation.BOUNCE);
 		setTimeout(function(){ marker.setAnimation(null); }, 1400);
+		map.panTo(marker.getPosition()); // centres map based on marker position
 	};
 
 
 	// triggered by list click, calls clickAction function
 	self.listClick = function(object) {
 		self.clickAction(object.marker, object.infowindow, object.contentString);
-		if (self.menuButtonVisible() == true) {
+		if (self.menuButtonVisible() === true) {
 			self.listHide(true); // hide menu after list click, but only if menu button is on screen
 		}
 	};
@@ -222,19 +223,19 @@ var ViewModel = function() {
 			var pubName = self.pubList()[i].name().toLowerCase();
 
 			if (pubName.indexOf(search) !=-1) {
-			self.pubList()[i].visible(true); // if filter matches name, change visible value to true
-			var markerToShow = self.pubList()[i].marker;
-			markerToShow.setVisible(true); // if filter matches name, change marker visibility to true
+				self.pubList()[i].visible(true); // if filter matches name, change visible value to true
+				var markerToShow = self.pubList()[i].marker;
+				markerToShow.setVisible(true); // if filter matches name, change marker visibility to true
 			} else {
-			self.pubList()[i].visible(false); // if filter doesn't match name, change visible value to false
-			var markerToHide = self.pubList()[i].marker;
-			markerToHide.setVisible(false); // if filter doesn't match name, change marker visibility to false
+				self.pubList()[i].visible(false); // if filter doesn't match name, change visible value to false
+				var markerToHide = self.pubList()[i].marker;
+				markerToHide.setVisible(false); // if filter doesn't match name, change marker visibility to false
 		//	self.showResetButton(true); // if at least one list object has been hidden, show 'reset filter' button
 			}
-		};
+		}
 	};
 
-	// subscribe to updates of filter phrase and trigger filter function
+	// subscribe to updates of filter phrase and trigger filter function. Method from http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	self.filterPhrase.subscribe(self.filter);
 
 
