@@ -25,4 +25,13 @@ ul:first-child {
 
 #filter-button {
 	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.listhide {
+	display: none;
+}
+
+.menu-button {
+	margin-bottom: 10px;
 }

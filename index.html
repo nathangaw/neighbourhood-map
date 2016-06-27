@@ -14,16 +14,20 @@
       <div class="left-column col-md-3">
         <div>
           <h1>Andover Pubs</h1>
-        </div>
-        <div class="filter">
-          <input data-bind="textInput: filterPhrase"></input><br><button id="filter-button" data-bind="click: checkFilter">Filter results</button>
-          <button id="reset-button" data-bind="visible: showResetButton, click: clearFilter">Reset filter</button>
+          <button class="menu-button" data-bind="click: showMenu, visible: menuButtonVisible">Menu</button>
         </div>
 
-        <div class="listitems">
-          <ul data-bind="foreach: pubList">
-            <li id="each-pub" data-bind="text: name, click: $parent.listClick, visible: visible"></li>
-          </ul>
+        <div data-bind="css: { listhide: listHide }">
+          <div class="filter">
+            <input placeholder="Type to filter" data-bind="textInput: filterPhrase"></input><br><button id="filter-button" data-bind="click: checkFilter">Filter results</button>
+            <button id="reset-button" data-bind="visible: showResetButton, click: clearFilter">Reset filter</button>
+          </div>
+
+          <div class="listitems">
+            <ul data-bind="foreach: pubList">
+              <li id="each-pub" data-bind="text: name, click: $parent.listClick, visible: visible"></li>
+            </ul>
+          </div>
         </div>
       </div>
 

@@ -97,6 +97,31 @@ var ViewModel = function() {
 	// self will always reference ViewModel
 	var self = this;
 
+	// set initial values for menu and menu button visibility
+	self.listHide = ko.observable(window.innerWidth < 992);
+	self.menuButtonVisible = ko.observable(window.innerWidth < 992);
+
+	// add event listener to monitor window size and adjust visibility of menu and menu button
+	window.addEventListener('resize', function(event) {
+		if (window.innerWidth < 992) {
+			self.listHide(true);
+			self.menuButtonVisible(true);
+		} else {
+			self.listHide(false);
+			self.menuButtonVisible(false);
+		};
+	});
+
+	// control showing/hiding of menu on menu button click
+	self.showMenu = function() {
+		if (self.listHide() == true) {
+			self.listHide(false);
+		} else {
+			self.listHide(true);
+		}
+
+	}
+
 	// create observable array for pubs to populate
 	self.pubList = ko.observableArray([]);
 
@@ -175,6 +200,9 @@ var ViewModel = function() {
 	// triggered by list click, calls clickAction function
 	self.listClick = function(object) {
 		self.clickAction(object.marker, object.infowindow, object.contentString);
+		if (self.menuButtonVisible() == true) {
+			self.listHide(true); // hide menu after list click, but only if menu button is on screen
+		}
 	};
 
 	// sets filter input text as observable
@@ -222,4 +250,5 @@ var ViewModel = function() {
 			this.showResetButton(false);
 		}
 	};
+
 };
