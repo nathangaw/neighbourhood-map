@@ -1,0 +1,25 @@
+#map {
+	width: 100%;
+	height: 500px;
+}
+
+ul {
+	padding-left: 0px;
+	padding-top: 20px;
+}
+
+#each-pub {
+	display: block;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	border-bottom: 1px solid black;
+}
+
+.attribution {
+	text-align: right;
+	padding-top: 15px;
+}
+
+#filter-button {
+	margin-top: 10px;
+}

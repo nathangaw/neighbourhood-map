@@ -1,6 +1,7 @@
 
 var model = {
 
+	// raw data
 	pubs: [
 			{
 				name: 'The Bourne Valley Inn',
@@ -19,30 +20,37 @@ var model = {
 				venueID: '4c0012c5c30a2d7fdef5111d'
 			},
 			{
-				name: 'Another pub',
+				name: 'The Angel',
 				location: 'Andover',
-				lat: '51.2544545',
-				lng: '-1.4123236726',
+				lat: '51.20941178309271',
+				lng: '-1.4790264368057',
 				visible: true,
-				venueID: '4c0012c5c30a2d7fdef5111d'
+				venueID: '4bb4b7d2613fb713a61294e6'
 			},
 			{
-				name: 'Yet Another pub',
+				name: 'Magic Roundabout',
 				location: 'Andover',
-				lat: '51.27343487',
-				lng: '-1.4434734',
+				lat: '51.21314255704008',
+				lng: '-1.4875885248184',
 				visible: true,
-				venueID: '4c0012c5c30a2d7fdef5111d'
+				venueID: '4c0b9f39340720a14c578893'
+			},
+			{
+				name: 'The Crook and Shears',
+				location: 'Upper Clatford',
+				lat: '51.191906137239414',
+				lng: '-1.49417757987976',
+				visible: true,
+				venueID: '4d3095a1789a8cfa3ded30c6'
 			}
 	],
 
-	Pub: function(data) {  // data is a passed in object literal from model or ajax request
+	// constructor function to create each pub with observable data
+	Pub: function(data) {
 		this.name = ko.observable(data.name);
 		this.location = ko.observable(data.location);
 		this.lat = ko.observable(data.lat);
 		this.lng = ko.observable(data.lng);
-	//	this.marker = ko.observable(data.marker);
-	//	this.infowindow = ko.observable(data.infowindow);
 		this.visible = ko.observable(data.visible);
 		this.venueID = ko.observable(data.venueID);
 	}
@@ -53,14 +61,26 @@ var map;
 
 var MapView = {
 
-	// call map and create markers
+
+
+
 	initMap: function() {
 
-	//	var myLatLng = {lat: -25.363, lng: 131.044};
-
 		map = new google.maps.Map(document.getElementById('map'), {
-			zoom: 12,
+			zoom: 11,
 			center: {lat: 51.221863, lng: -1.439873}
+		});
+
+		// keep centre of map in middle of window on resize. Courtesy of http://stackoverflow.com/questions/8792676/center-google-maps-v3-on-browser-resize-responsive
+		var center;
+		function calculateCenter() {
+		  center = map.getCenter();
+		}
+		google.maps.event.addDomListener(map, 'idle', function() {
+		  calculateCenter();
+		});
+		google.maps.event.addDomListener(window, 'resize', function() {
+		  map.setCenter(center);
 		});
 
 		ko.applyBindings( new ViewModel() );
@@ -84,7 +104,8 @@ var ViewModel = function() {
 
 	this.showResetButton = ko.observable(false);
 
-	//create markers
+	var infowindow = new google.maps.InfoWindow();
+
 	self.pubList().forEach(function(pub) {
 		var marker = new google.maps.Marker({
 			position: new google.maps.LatLng(pub.lat(), pub.lng()),
@@ -103,32 +124,30 @@ var ViewModel = function() {
 				var likeCount = data.response.venue.likes.count;
 				var foursquareCanonicalURL = data.response.venue.canonicalUrl;
 
-				var infowindow = new google.maps.InfoWindow({
-					content: pub.name() + ' - ' + pub.location() + '<br>' + 'Tel: ' + phone + '<br>' + 'Foursquare Likes: ' + likeCount + '<br>' + '<a href="' + foursquareCanonicalURL + '">View on Foursquare</a>'
-					});
-
+				var contentString =	pub.name() + ' - ' + pub.location() + '<br>' + 'Tel: ' + phone + '<br>' + 'Foursquare Likes: ' + likeCount + '<br>' + '<a href="' + foursquareCanonicalURL + '">View on Foursquare</a>'
+				pub.contentString = contentString;
 				pub.infowindow = infowindow;
-				self.listener(marker, infowindow);
+				self.listener(marker, infowindow, contentString);
 			},
 			error: function() {
-				var infowindow = new google.maps.InfoWindow({
-					content: pub.name() + ' - ' + pub.location() + '<br>Additional information ftom Foursquare is not available at this time.'
-					});
 
+				var contentString =	pub.name() + ' - ' + pub.location() + '<br>Additional information from Foursquare is not available at this time.'
+				pub.contentString = contentString;
 				pub.infowindow = infowindow;
-				self.listener(marker, infowindow);
+				self.listener(marker, infowindow, contentString);
 			}
 		})
 	})
 
-	self.listener = function(marker, infowindow) {
+	self.listener = function(marker, infowindow, contentString) {
 		marker.addListener('click', function() {
-		self.clickAction(marker, infowindow);
+		self.clickAction(marker, infowindow, contentString);
 		});
 	}
 
 
-	self.clickAction = function(marker, infowindow) {
+	self.clickAction = function(marker, infowindow, contentString) {
+		infowindow.setContent(contentString);
 		infowindow.open(marker.get('map'), marker);
 		marker.setAnimation(google.maps.Animation.BOUNCE);
 		setTimeout(function(){ marker.setAnimation(null); }, 1400);
@@ -137,13 +156,16 @@ var ViewModel = function() {
 
 
 	self.listClick = function(object) {
-		self.clickAction(object.marker, object.infowindow);
+		self.clickAction(object.marker, object.infowindow, object.contentString);
 	}
 
 	this.filterPhrase = ko.observable('');
 
 	// checks filter phrase against pubnames and hides names that aren't matched
 	this.checkFilter = function() {
+
+		// close all infowindows so open windows don't remain when markers removed
+		infowindow.close();
 
 		// convert filter phrase to lower case and assign to simpler var
 		var search = self.filterPhrase().toLowerCase();
@@ -175,7 +197,14 @@ var ViewModel = function() {
 
 	this.clearFilter = function() {
 		for (i = 0; i < self.pubList().length; i++) {
+			// makes all pubs in list visible
 			self.pubList()[i].visible(true);
+
+			// makes all markers visible
+			self.pubList()[i].marker.setVisible(true);
+
+			// hides reset filter button
+			this.showResetButton(false);
 		}
 	}
 

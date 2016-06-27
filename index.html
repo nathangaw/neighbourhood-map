@@ -3,45 +3,44 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css">
     <title>Andover Pubs</title>
     <meta name="viewport" content="width=device-width">
-
-
   </head>
 
-  <body>
+  <body class="container-fluid">
+    <div class="row">
+      <div class="left-column col-md-3">
+        <div>
+          <h1>Andover Pubs</h1>
+        </div>
+        <div class="filter">
+          <input data-bind="textInput: filterPhrase"></input><br><button id="filter-button" data-bind="click: checkFilter">Filter results</button>
+          <button id="reset-button" data-bind="visible: showResetButton, click: clearFilter">Reset filter</button>
+        </div>
 
-  <div>
-    <h1>Andover Pubs</h1>
-  </div>
+        <div class="listitems">
+          <ul data-bind="foreach: pubList">
+            <li id="each-pub" data-bind="text: name, click: $parent.listClick, visible: visible"></li>
+          </ul>
+        </div>
+      </div>
 
-  <div class="list" style="width: 30%">
-    <div class="filter">
-      <input data-bind="textInput: filterPhrase"></input><button data-bind="click: checkFilter">Filter now</button>
-      <button data-bind="visible: showResetButton, click: clearFilter">Remove filter</button>
+      <div class="map col-md-9">
+          <div id="map"></div>
+      </div>
     </div>
-    <div class="listitems">
-      <ul data-bind="foreach: pubList">
-        <li data-bind="text: name, click: $parent.listClick, visible: visible"></li>
-      </ul>
+
+    <div class="attribution">
+      <p>Data courtesy of Google Maps and Foursquare</p>
     </div>
 
-  </div>
 
-  <div id="map" style="width: 80%; height: 700px">
-
-  </div>
-  <div>
-    <p>Data courtesy of Google Maps and Foursquare.</p>
   <script src="js/lib/knockout-3.2.0.js" async></script>
   <script src="js/app.js" async></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvytZSkav8-kdIVLQsSOs_jnfo-HFNvTw&callback=MapView.initMap"onerror="MapView.googleError()" async></script>
   <script src="js/lib/jquery.min.js" async></script>
-
-
-
-
-
 
   </body>
 </html>
