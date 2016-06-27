@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="style.css">
     <title>Andover Pubs</title>
   </head>
 
@@ -19,8 +19,8 @@
 
         <div data-bind="css: { listhide: listHide }">
           <div class="filter">
-            <input placeholder="Type to filter" data-bind="textInput: filterPhrase"></input><br><button id="filter-button" data-bind="click: checkFilter">Filter results</button>
-            <button id="reset-button" data-bind="visible: showResetButton, click: clearFilter">Reset filter</button>
+          <input type="text" placeholder="Type to filter" data-bind="value: filterPhrase, valueUpdate: 'keyup'">
+        <!--    <button id="reset-button" data-bind="visible: showResetButton, click: clearFilter">Reset filter</button> -->
           </div>
 
           <div class="listitems">
@@ -40,12 +40,9 @@
       <p>Data courtesy of Google Maps and Foursquare</p>
     </div>
   </body>
-
 <script src="js/lib/knockout-3.2.0.js"></script>
 <script src="js/app.js"></script>
 <script src="js/lib/jquery.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvytZSkav8-kdIVLQsSOs_jnfo-HFNvTw&callback=MapView.initMap"onerror="MapView.googleError()" async></script>
-
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvytZSkav8-kdIVLQsSOs_jnfo-HFNvTw&callback=MapView.initMap" onerror="MapView.googleError()" async></script>
 
 </html>

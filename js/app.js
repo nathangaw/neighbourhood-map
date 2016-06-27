@@ -131,7 +131,7 @@ var ViewModel = function() {
 	});
 
 	// set reset button to be hidden by default
-	this.showResetButton = ko.observable(false);
+//	this.showResetButton = ko.observable(false);
 
 	// create infowindow object for use later
 	var infowindow = new google.maps.InfoWindow();
@@ -208,9 +208,8 @@ var ViewModel = function() {
 	// sets filter input text as observable
 	this.filterPhrase = ko.observable('');
 
-	// checks filter phrase against pubnames and hides names that aren't matched
-	this.checkFilter = function() {
-
+	// match filter phrase against pub names
+	self.filter = function(value) {
 		// close all infowindows so open windows don't remain when markers are removed
 		infowindow.close();
 
@@ -222,8 +221,7 @@ var ViewModel = function() {
 
 			var pubName = self.pubList()[i].name().toLowerCase();
 
-
-			if (pubName.startsWith(search)) {
+			if (pubName.indexOf(search) !=-1) {
 			self.pubList()[i].visible(true); // if filter matches name, change visible value to true
 			var markerToShow = self.pubList()[i].marker;
 			markerToShow.setVisible(true); // if filter matches name, change marker visibility to true
@@ -231,11 +229,16 @@ var ViewModel = function() {
 			self.pubList()[i].visible(false); // if filter doesn't match name, change visible value to false
 			var markerToHide = self.pubList()[i].marker;
 			markerToHide.setVisible(false); // if filter doesn't match name, change marker visibility to false
-			this.showResetButton(true); // if at least one list object has been hidden, show 'reset filter' button
+		//	self.showResetButton(true); // if at least one list object has been hidden, show 'reset filter' button
 			}
-		}
+		};
 	};
 
+	// subscribe to updates of filter phrase and trigger filter function
+	self.filterPhrase.subscribe(self.filter);
+
+
+	/* No longer required because of real-time filter update
 	// resets filter
 	this.clearFilter = function() {
 		for (var i = 0; i < self.pubList().length; i++) {
@@ -250,5 +253,6 @@ var ViewModel = function() {
 			this.showResetButton(false);
 		}
 	};
+	*/
 
 };
